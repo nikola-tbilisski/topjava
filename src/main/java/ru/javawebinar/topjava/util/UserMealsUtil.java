@@ -59,8 +59,7 @@ public class UserMealsUtil {
     }
 
     private static Map<LocalDate, Integer> getLocalDateIntegerMap(List<UserMeal> meals) {
-        return meals
-                .stream()
+        return meals.stream()
                 .collect(
                         Collectors.groupingBy(UserMeal::getDate, Collectors.summingInt(UserMeal::getCalories))
                 );
