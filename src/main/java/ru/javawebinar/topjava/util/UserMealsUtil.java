@@ -35,33 +35,31 @@ public class UserMealsUtil {
     }
 
     public static List<UserMealWithExcess> filteredByCycles(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
-        Map<LocalDate, Integer> localDateCaloriesSumMap = new HashMap<>();
+        Map<LocalDate, Integer> caloriesSumByDates = new HashMap<>();
         for (UserMeal um : meals) {
-            localDateCaloriesSumMap.merge(um.getDate(), um.getCalories(), Integer::sum);
+            caloriesSumByDates.merge(um.getDate(), um.getCalories(), Integer::sum);
         }
 
         List<UserMealWithExcess> umWithExcessList = new ArrayList<>();
         for (UserMeal um : meals) {
             if (TimeUtil.isBetweenHalfOpen(um.getDateTime().toLocalTime(), startTime, endTime)) {
-                umWithExcessList.add
-                        (new UserMealWithExcess(um.getDateTime(),
+                umWithExcessList.add(new UserMealWithExcess(um.getDateTime(),
                                 um.getDescription(), um.getCalories(),
-                                localDateCaloriesSumMap.get(um.getDate()) > caloriesPerDay));
+                                caloriesSumByDates.get(um.getDate()) > caloriesPerDay));
             }
         }
         return umWithExcessList;
     }
 
     public static List<UserMealWithExcess> filteredByStreams(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
-        Map<LocalDate, Integer> localDateCaloriesSumMap = meals.stream()
+        Map<LocalDate, Integer> caloriesSumByDates = meals.stream()
                 .collect(Collectors.groupingBy(UserMeal::getDate, Collectors.summingInt(UserMeal::getCalories)));
 
         return meals.stream()
                 .filter(um -> TimeUtil.isBetweenHalfOpen(um.getDateTime().toLocalTime(), startTime, endTime))
                 .map(um -> new UserMealWithExcess(um.getDateTime(),
                         um.getDescription(), um.getCalories(),
-                        localDateCaloriesSumMap.get(um.getDate()) > caloriesPerDay))
+                        caloriesSumByDates.get(um.getDate()) > caloriesPerDay))
                 .collect(Collectors.toList());
     }
-
 }
